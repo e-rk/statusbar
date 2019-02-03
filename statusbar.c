@@ -11,26 +11,24 @@
 
 #define ARRAY_SIZE(array) ( sizeof(array) / sizeof(array[0]) )
 
-#define STATUS_LENGTH 128   /* Maximum status bar length.  */
-#define SEPARATOR     " | " /* Status separator string.    */
-
 
 typedef size_t (* handler_t)(char * output, size_t length);
 
-static Display * dpy;
+static const int    m_max_status_length = 128;    /* Maximum status bar length.  */
+static const char   m_separator[]       = " | ";  /* Status separator string.    */
+static Display    * mp_dpy              = NULL;
 
 
 static void print_status(const char * status)
 {
-    XStoreName(dpy, DefaultRootWindow(dpy), status);
-    XSync(dpy, false);
+    XStoreName(mp_dpy, DefaultRootWindow(mp_dpy), status);
+    XSync(mp_dpy, false);
 }
 
 
 static size_t update_time(char * output, size_t length)
 {
     struct tm * timeinfo;
-    char      * status;
     time_t      rawtime;
 
     time(&rawtime);
@@ -93,6 +91,10 @@ static size_t update_mpd(char * output, size_t length)
                     case MPD_STATE_STOP:
                         play_status = "Stopped";
                         break;
+
+                    case MPD_STATE_UNKNOWN:
+                        play_status = "Unknown";
+                        break;
                 }
 
                 snprintf(output, length, "[%s] %.2d:%.2d/%.2d:%.2d %s - %s",
@@ -114,9 +116,9 @@ static size_t update_mpd(char * output, size_t length)
 
 static void update(handler_t handlers[], size_t status_count)
 {
-    static const size_t separator_length = strlen(SEPARATOR);
+    static const size_t separator_length = ARRAY_SIZE(m_separator) - 1;
 
-    char   status[STATUS_LENGTH];
+    char   status[m_max_status_length];
     char * offset = status;
 
     size_t status_length = 0;
@@ -126,12 +128,12 @@ static void update(handler_t handlers[], size_t status_count)
     
     for (int i = 0; i < status_count; ++i)
     {
-        temp_length = handlers[i](offset, STATUS_LENGTH - status_length);
+        temp_length = handlers[i](offset, m_max_status_length - status_length);
 
         offset        += temp_length;
         status_length += temp_length;
         
-        if (((STATUS_LENGTH - status_length) <= separator_length)
+        if (((m_max_status_length - status_length) <= separator_length)
         ||  ((status_count - 1) == i))
         {
             /* Too little space to print anything or nothing to print at all. */
@@ -140,7 +142,7 @@ static void update(handler_t handlers[], size_t status_count)
         else if (temp_length > 0)
         {
             /* Print separator. */
-            snprintf(offset, STATUS_LENGTH - status_length, "%s", SEPARATOR);
+            snprintf(offset, m_max_status_length - status_length, "%s", m_separator);
             offset        += separator_length;
             status_length += separator_length;
         }
@@ -157,9 +159,9 @@ int main(int argc, char *argv[])
         update_mpd, update_time,
     };
 
-    dpy = XOpenDisplay(NULL);
+    mp_dpy = XOpenDisplay(NULL);
 
-    if (dpy == NULL)
+    if (mp_dpy == NULL)
     {
         fprintf(stderr, "unable to open display.\n");
         return 1;
@@ -171,7 +173,7 @@ int main(int argc, char *argv[])
         sleep(1);
     }
 
-    XCloseDisplay(dpy);
+    XCloseDisplay(mp_dpy);
 
     return 0;
 }
