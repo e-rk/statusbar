@@ -19,11 +19,13 @@ typedef size_t (* handler_t)(char * output, size_t length);
 
 static Display * dpy;
 
-void print_status(const char * status)
+
+static void print_status(const char * status)
 {
     XStoreName(dpy, DefaultRootWindow(dpy), status);
     XSync(dpy, false);
 }
+
 
 static size_t update_time(char * output, size_t length)
 {
@@ -58,7 +60,7 @@ static size_t update_mpd(char * output, size_t length)
 
     connection = mpd_connection_new("localhost", 0, 30000);
 
-    if ((connection != NULL) || mpd_connection_get_error(connection) == 0)
+    if ((connection != NULL) && mpd_connection_get_error(connection) == 0)
     {
         mpd_command_list_begin(connection, true);
         mpd_send_status(connection);
@@ -69,39 +71,42 @@ static size_t update_mpd(char * output, size_t length)
 
         if (status != NULL)
         {
-            time_elapsed = mpd_status_get_elapsed_time(status);
-            time_total   = mpd_status_get_total_time(status);
-
-            switch (mpd_status_get_state(status))
-            {
-                case MPD_STATE_PLAY:
-                    play_status = "Playing";
-                    break;
-
-                case MPD_STATE_PAUSE:
-                    play_status = "Paused";
-                    break;
-
-                case MPD_STATE_STOP:
-                    play_status = "Stopped";
-                    break;
-            }
-            
             mpd_response_next(connection);
-
             song = mpd_recv_song(connection);
 
-            snprintf(output, length, "[%s] %.2d:%.2d/%.2d:%.2d %s - %s",
-                     play_status,
-                     time_elapsed / 60, time_elapsed % 60,
-                     time_total   / 60, time_total   % 60,
-                     mpd_song_get_tag(song, MPD_TAG_ARTIST, 0),
-                     mpd_song_get_tag(song, MPD_TAG_TITLE, 0));
+            if (song != NULL)
+            {
+
+                time_elapsed = mpd_status_get_elapsed_time(status);
+                time_total   = mpd_status_get_total_time(status);
+
+                switch (mpd_status_get_state(status))
+                {
+                    case MPD_STATE_PLAY:
+                        play_status = "Playing";
+                        break;
+
+                    case MPD_STATE_PAUSE:
+                        play_status = "Paused";
+                        break;
+
+                    case MPD_STATE_STOP:
+                        play_status = "Stopped";
+                        break;
+                }
+
+                snprintf(output, length, "[%s] %.2d:%.2d/%.2d:%.2d %s - %s",
+                         play_status,
+                         time_elapsed / 60, time_elapsed % 60,
+                         time_total   / 60, time_total   % 60,
+                         mpd_song_get_tag(song, MPD_TAG_ARTIST, 0),
+                         mpd_song_get_tag(song, MPD_TAG_TITLE, 0));
+            }
         }
+
+        mpd_response_finish(connection);
+        mpd_connection_free(connection);
     }
-    
-    mpd_response_finish(connection);
-    mpd_connection_free(connection);
 
     return strlen(output);
 }
@@ -111,9 +116,7 @@ static void update(handler_t handlers[], size_t status_count)
 {
     static const size_t separator_length = strlen(SEPARATOR);
 
-    char * tmp = NULL;
     char   status[STATUS_LENGTH];
-
     char * offset = status;
 
     size_t status_length = 0;
@@ -128,14 +131,13 @@ static void update(handler_t handlers[], size_t status_count)
         offset        += temp_length;
         status_length += temp_length;
         
-        if ((temp_length == 0)
-        || ((STATUS_LENGTH - status_length) <= separator_length)
-        || ((status_count - 1) == i))
+        if (((STATUS_LENGTH - status_length) <= separator_length)
+        ||  ((status_count - 1) == i))
         {
             /* Too little space to print anything or nothing to print at all. */
             break;
         }
-        else
+        else if (temp_length > 0)
         {
             /* Print separator. */
             snprintf(offset, STATUS_LENGTH - status_length, "%s", SEPARATOR);
@@ -143,6 +145,7 @@ static void update(handler_t handlers[], size_t status_count)
             status_length += separator_length;
         }
     }
+
     print_status(status);
 }
 
