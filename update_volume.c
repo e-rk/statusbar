@@ -38,6 +38,7 @@ size_t volume_update(char * output, size_t length)
             snprintf(output, length, "Vol:%ld%%", 100 * volume / vol_max);
         }
 
+        snd_mixer_detach(p_handle, card);
         snd_mixer_close(p_handle);
     }
 
