@@ -82,7 +82,11 @@ size_t mpd_update(char * output, size_t length)
                              time_total   / 60, time_total   % 60,
                              mpd_song_get_tag(p_song, MPD_TAG_ARTIST, 0),
                              mpd_song_get_tag(p_song, MPD_TAG_TITLE, 0));
+
+                    mpd_song_free(p_song);
                 }
+
+                mpd_status_free(p_status);
             }
 
             mpd_response_finish(mp_connection);
