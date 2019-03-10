@@ -60,23 +60,23 @@ size_t mpd_update(char * output, size_t length)
                     switch (mpd_status_get_state(p_status))
                     {
                         case MPD_STATE_PLAY:
-                            p_play_status = "Playing";
+                            p_play_status = "\u25b6";
                             break;
 
                         case MPD_STATE_PAUSE:
-                            p_play_status = "Paused";
+                            p_play_status = "\u23f8";
                             break;
 
                         case MPD_STATE_STOP:
-                            p_play_status = "Stopped";
+                            p_play_status = "\u25a0";
                             break;
 
                         case MPD_STATE_UNKNOWN:
-                            p_play_status = "Unknown";
+                            p_play_status = "?";
                             break;
                     }
 
-                    snprintf(output, length, "[%s] %.2d:%.2d/%.2d:%.2d %s - %s",
+                    snprintf(output, length, "%s %.2d:%.2d/%.2d:%.2d %s - %s",
                              p_play_status,
                              time_elapsed / 60, time_elapsed % 60,
                              time_total   / 60, time_total   % 60,
