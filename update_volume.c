@@ -9,8 +9,8 @@ size_t volume_update(char * output, size_t length)
     snd_mixer_selem_id_t * p_sid    = NULL;
     snd_mixer_elem_t     * p_elem   = NULL;
 
-    const char card[]       = "default";
-    const char selem_name[] = "Master";
+    const char * card       = "default";
+    const char * selem_name = "Master";
 
     long vol_min = 0;
     long vol_max = 0;
