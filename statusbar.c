@@ -61,6 +61,7 @@ int main(int argc, char *argv[])
 {
     handler_t handlers[] =
     {
+        battery_update,
         volume_update,
         mpd_update,
         time_update,

@@ -4,7 +4,8 @@ CC = gcc
 CFLAGS = -D_POSIX_SOURCE  \
 				 -Wall            \
 				 -pedantic-errors \
-				 -std=c11
+				 -std=c11         \
+				 -O2
 
 LIBS   = -lmpdclient     \
 				 -lX11           \
@@ -16,12 +17,13 @@ BIN    = statusbar
 OBJ    = statusbar.o     \
 				 update_mpd.o    \
 				 update_time.o   \
-				 update_volume.o
+				 update_volume.o \
+				 update_battery.o
 
 DEPS  =  statusbar.h
 
 %.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(FLAGS)
+	$(CC) -c -o $@ $< $(CFLAGS)
 
 $(BIN): $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)

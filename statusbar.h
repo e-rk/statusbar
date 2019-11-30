@@ -12,6 +12,7 @@ typedef size_t (* handler_t)(char * output, size_t length);
 size_t volume_update(char * output, size_t length);
 size_t mpd_update(char * output, size_t length);
 size_t time_update(char * output, size_t length);
+size_t battery_update(char * output, size_t length);
 
 
 #endif /* _STATUSBAR_H */
