@@ -12,6 +12,8 @@ size_t volume_update(char * output, size_t length)
     const char * card       = "default";
     const char * selem_name = "Master";
 
+    size_t len = 0;
+
     long vol_min = 0;
     long vol_max = 0;
 
@@ -35,12 +37,12 @@ size_t volume_update(char * output, size_t length)
         {
             snd_mixer_selem_get_playback_volume_range(p_elem, &vol_min, &vol_max);
             snd_mixer_selem_get_playback_volume(p_elem, 0, &volume);
-            snprintf(output, length, "Vol:%ld%%", 100 * volume / vol_max);
+            len = snprintf(output, length, "Vol:%ld%%", 100 * volume / vol_max);
         }
 
         snd_mixer_detach(p_handle, card);
         snd_mixer_close(p_handle);
     }
 
-    return strlen(output);
+    return len;
 }
