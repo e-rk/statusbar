@@ -1,5 +1,4 @@
 PREFIX = /usr
-CC = gcc
 
 CFLAGS = -D_POSIX_SOURCE  \
 				 -Wall            \
@@ -7,10 +6,9 @@ CFLAGS = -D_POSIX_SOURCE  \
 				 -std=c11         \
 				 -O2
 
-LIBS   = -lmpdclient     \
+LDLIBS = -lmpdclient     \
 				 -lX11           \
 				 -lasound
-
 
 BIN    = statusbar
 
@@ -20,20 +18,18 @@ OBJ    = statusbar.o     \
 				 update_volume.o \
 				 update_battery.o
 
-DEPS  =  statusbar.h
-
-%.o: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
+DEPS   = statusbar.h
 
 $(BIN): $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+$(OBJ): $(DEPS)
 
 .PHONY: clean
 
 all: clean $(BIN)
 
 clean:
-	rm -f *.o $(BIN)
+	rm -f $(OBJ) $(BIN)
 
 .PHONY: install
 install: $(BIN)
