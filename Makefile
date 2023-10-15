@@ -7,7 +7,6 @@ CFLAGS = -D_POSIX_SOURCE  \
 				 -O2
 
 LDLIBS = -lmpdclient     \
-				 -lX11           \
 				 -lasound
 
 BIN    = statusbar

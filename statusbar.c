@@ -2,20 +2,17 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <X11/Xlib.h>
-
 #include "statusbar.h"
 
 
 static const int    m_max_status_length = 128;    /* Maximum status bar length.  */
 static const char   m_separator[]       = " | ";  /* Status separator string.    */
-static Display    * mp_dpy              = NULL;
 
 
 static void print_status(const char * status)
 {
-    XStoreName(mp_dpy, DefaultRootWindow(mp_dpy), status);
-    XSync(mp_dpy, false);
+    fprintf(stdout, "%s\n", status);
+    fflush(stdout);
 }
 
 
@@ -67,22 +64,11 @@ int main(int argc, char *argv[])
         time_update,
     };
 
-    mp_dpy = XOpenDisplay(NULL);
-
-    if (mp_dpy == NULL)
-    {
-        fprintf(stderr, "unable to open display.\n");
-        return 1;
-    }
-
     while (true)
     {
         update(handlers, ARRAY_SIZE(handlers));
         sleep(1);
     }
-
-    /* Should never reach this line. */
-    XCloseDisplay(mp_dpy);
 
     return 0;
 }
