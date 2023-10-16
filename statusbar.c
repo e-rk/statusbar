@@ -5,7 +5,7 @@
 #include "statusbar.h"
 
 
-static const int    m_max_status_length = 128;    /* Maximum status bar length.  */
+static const int    m_max_status_length = 256;    /* Maximum status bar length.  */
 static const char   m_separator[]       = " | ";  /* Status separator string.    */
 
 
