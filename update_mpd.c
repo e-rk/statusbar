@@ -27,6 +27,8 @@ size_t mpd_update(char * output, size_t length)
     int time_elapsed = 0;
     int time_total   = 0;
 
+    char title_buffer[256];
+
     if (mp_connection == NULL)
     {
         mpd_init();
@@ -76,12 +78,21 @@ size_t mpd_update(char * output, size_t length)
                             break;
                     }
 
-                    snprintf(output, length, "%s %.2d:%.2d/%.2d:%.2d %s - %s",
+                    const char *artist = mpd_song_get_tag(p_song, MPD_TAG_ARTIST, 0);
+                    const char *title = mpd_song_get_tag(p_song, MPD_TAG_TITLE, 0);
+
+                    if (artist) {
+                        snprintf(title_buffer, sizeof(title_buffer), "%s - %s",
+                                 artist, title);
+                    } else {
+                        snprintf(title_buffer, sizeof(title_buffer), "%s", title);
+                    }
+
+                    snprintf(output, length, "%s %.2d:%.2d/%.2d:%.2d %s",
                              p_play_status,
                              time_elapsed / 60, time_elapsed % 60,
                              time_total   / 60, time_total   % 60,
-                             mpd_song_get_tag(p_song, MPD_TAG_ARTIST, 0),
-                             mpd_song_get_tag(p_song, MPD_TAG_TITLE, 0));
+                             title_buffer);
 
                     mpd_song_free(p_song);
                 }
